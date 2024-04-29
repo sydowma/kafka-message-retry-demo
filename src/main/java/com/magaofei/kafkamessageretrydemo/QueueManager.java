@@ -1,6 +1,9 @@
 package com.magaofei.kafkamessageretrydemo;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class QueueManager<R> {
@@ -9,30 +12,38 @@ public class QueueManager<R> {
      * key: unique id
      * value: zset of java version
      */
-    private final Map<String, ArrayBlockingQueue<R>> queueEntries;
+    private static class ScoredItem<R> {
+        R item;
+        double score;
 
-    public QueueManager() {
-        this.queueEntries = new java.util.HashMap<>(32);
+        ScoredItem(R item, double score) {
+            this.item = item;
+            this.score = score;
+        }
     }
 
-    public void add(String s, R bill) {
-        ArrayBlockingQueue<R> queue = queueEntries.get(s);
+    private final Map<String, PriorityQueue<ScoredItem<R>>> queueEntries;
+
+    public QueueManager() {
+        this.queueEntries = new HashMap<>();
+    }
+
+    public void add(String s, R item, double score) {
+        PriorityQueue<ScoredItem<R>> queue = queueEntries.get(s);
         if (queue == null) {
-            queue = new ArrayBlockingQueue<>(100);
+            queue = new PriorityQueue<>(Comparator.comparingDouble(a -> a.score));
             queueEntries.put(s, queue);
         }
-        queue.add(bill);
+        queue.add(new ScoredItem<>(item, score));
     }
 
     public R poll() {
-        for (Map.Entry<String, ArrayBlockingQueue<R>> entry : queueEntries.entrySet()) {
-
-            R poll = entry.getValue().poll();
-            if (poll != null) {
-                return poll;
+        for (Map.Entry<String, PriorityQueue<ScoredItem<R>>> entry : queueEntries.entrySet()) {
+            ScoredItem<R> polledItem = entry.getValue().poll();
+            if (polledItem != null) {
+                return polledItem.item;
             }
         }
-
         return null;
     }
 }

@@ -59,11 +59,10 @@ public class KafkaProducerDemo {
     }
 
     private void send() {
-        int id = random.nextInt(1000000);
         int userId = random.nextInt(10);
         int botId = random.nextInt(10);
         int amount = random.nextInt(10);
-        Bill bill = new Bill(String.valueOf(id), String.valueOf(botId), String.valueOf(userId), new BigDecimal(amount));
+        Bill bill = new Bill(String.valueOf(System.currentTimeMillis()), String.valueOf(botId), String.valueOf(userId), new BigDecimal(amount));
         ProducerRecord<String, Bill> producerRecord = new ProducerRecord<>("test", bill.botId(), bill);
         kafkaProducer.send(producerRecord);
     }

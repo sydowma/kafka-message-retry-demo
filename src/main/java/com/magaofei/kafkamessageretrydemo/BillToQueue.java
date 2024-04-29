@@ -9,7 +9,7 @@ public class BillToQueue {
     }
 
     public void addToFirst(Bill bill) {
-        this.queueManager.add(bill.botId(), bill);
+        this.queueManager.add(bill.botId(), bill, Double.parseDouble(bill.id()));
     }
 
     public Bill getLast() {
