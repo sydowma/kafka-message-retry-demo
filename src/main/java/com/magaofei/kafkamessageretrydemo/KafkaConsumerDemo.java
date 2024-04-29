@@ -20,12 +20,12 @@ public class KafkaConsumerDemo {
 
     private static final Logger logger = LoggerFactory.getLogger(KafkaConsumerDemo.class);
 
-    private KafkaConsumer<String, byte[]> kafkaConsumer;
+    private KafkaConsumer<String, Bill> kafkaConsumer;
 
     public KafkaConsumerDemo() {
         Map<String, Object> properties = KafkaConfiguration.getKafkaProperties(); // Ensure this returns Map<String, Object>
         properties.put("group.id", "test_group");
-        this.kafkaConsumer = new KafkaConsumer<>(properties, new StringDeserializer(), new ByteArrayDeserializer());
+        this.kafkaConsumer = new KafkaConsumer<>(properties, new StringDeserializer(), new BillDeserializer());
         kafkaConsumer.subscribe(List.of("test"));
         Executors.newSingleThreadExecutor().execute(() -> {
             while (true) {
@@ -34,10 +34,10 @@ public class KafkaConsumerDemo {
         });
     }
 
-    public void consume(ConsumerRecord<String, byte[]> record) {
+    public void consume(ConsumerRecord<String, Bill> record) {
 
-            byte[] value = record.value();
-            logger.info("Received message: {}", Arrays.toString(record.value()));
+            Bill value = record.value();
+            logger.info("Received message: {}", value);
 
     }
 
