@@ -24,6 +24,14 @@ If a message is set for retry, other messages with the same botId should also be
 
 The system should minimize I/O operations.
 
+### implement
+
+- [x] produce message
+- [x] consume message
+- [x] consume message and sort by botId
+- [ ] retry message
+- [ ] persist data
+
 ### Build Instructions
 
 To build the project, run the following command in your terminal:
