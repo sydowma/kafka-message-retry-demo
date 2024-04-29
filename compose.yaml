@@ -31,7 +31,7 @@ services:
       KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9093
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "baeldung:1:1"
+      KAFKA_CREATE_TOPICS: "test:6:1"
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     depends_on:
