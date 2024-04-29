@@ -27,7 +27,6 @@ The system should minimize I/O operations.
 ### Build Instructions
 
 To build the project, run the following command in your terminal:
-```
-shell
+```shell
 ./local_build.sh
 ```
