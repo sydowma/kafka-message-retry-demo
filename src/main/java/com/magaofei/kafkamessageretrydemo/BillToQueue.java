@@ -13,6 +13,14 @@ public class BillToQueue {
     }
 
     public Bill getLast() {
-        return this.queueManager.poll();
+        return this.queueManager.peek();
+    }
+
+    public void removeLast(Bill bill) {
+        this.queueManager.removeLastElement(bill.botId(), bill);
+    }
+
+    public void replace(Bill bill) {
+        this.queueManager.replaceLastElement(bill.botId(), bill.id(), bill);
     }
 }

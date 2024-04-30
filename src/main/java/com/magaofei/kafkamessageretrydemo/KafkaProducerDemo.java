@@ -2,10 +2,9 @@ package com.magaofei.kafkamessageretrydemo;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.CreatePartitionsResult;
-import org.apache.kafka.clients.admin.KafkaAdminClient;
-import org.apache.kafka.clients.admin.NewPartitions;
+import org.apache.kafka.clients.admin.*;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -16,10 +15,15 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class KafkaProducerDemo {
@@ -35,6 +39,11 @@ public class KafkaProducerDemo {
             Map<String, NewPartitions> newPartitions = new HashMap<>();
             newPartitions.put("test", NewPartitions.increaseTo(6));
             CreatePartitionsResult partitions = adminClient.createPartitions(newPartitions);
+            NewTopic retry5s = new NewTopic("retry-5s", 6, (short) 1);
+            NewTopic retry30s = new NewTopic("retry-30s", 6, (short) 1);
+            List<NewTopic> retryTopics = List.of(retry5s, retry30s);
+            CreateTopicsResult topics = adminClient.createTopics(retryTopics);
+            logger.info("Topics: {}", topics.all().get());
             logger.info("Partitions: {}", partitions.all().get());
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
@@ -62,8 +71,19 @@ public class KafkaProducerDemo {
         int userId = random.nextInt(10);
         int botId = random.nextInt(10);
         int amount = random.nextInt(10);
-        Bill bill = new Bill(String.valueOf(System.currentTimeMillis()), String.valueOf(botId), String.valueOf(userId), new BigDecimal(amount));
+        Bill bill = new Bill(String.valueOf(System.currentTimeMillis()), String.valueOf(botId), String.valueOf(userId),
+                new BigDecimal(amount), 0);
         ProducerRecord<String, Bill> producerRecord = new ProducerRecord<>("test", bill.botId(), bill);
         kafkaProducer.send(producerRecord);
     }
+
+    public void sendRetryMessages(Bill bill) {
+        logger.info("Send retry message: {}", bill);
+        ProducerRecord<String, Bill> producerRecord = new ProducerRecord<>("retry-5s", bill.botId(), bill);
+        kafkaProducer.send(producerRecord);
+    }
+
+
+
+
 }

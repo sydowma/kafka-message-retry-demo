@@ -1,12 +1,35 @@
 package com.magaofei.kafkamessageretrydemo;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.*;
 
 public class QueueManager<R> {
+
+    public void removeLastElement(String botId, Bill bill) {
+
+        PriorityQueue<ScoredItem<R>> scoredItems = this.queueEntries.get(botId);
+        ScoredItem<R> scoredItem = scoredItems.peek();
+        if (scoredItem != null && (scoredItem.item).equals(bill)) {
+            scoredItems.poll();
+        } else {
+            throw new RuntimeException("removeLastElement failed");
+        }
+    }
+
+    public void replaceLastElement(String botId, String id, R bill) {
+
+        PriorityQueue<ScoredItem<R>> scoredItems = this.queueEntries.get(botId);
+        ScoredItem<R> peek = scoredItems.peek();
+        if (peek != null && peek.item.equals(bill)) {
+            // replace the last element
+            // TODO performance
+            scoredItems.poll();
+            scoredItems.add(new ScoredItem<>(bill, Double.parseDouble(id)));
+            peek = scoredItems.peek();
+            assert Objects.requireNonNull(peek).item.equals(bill);
+        } else {
+            throw new RuntimeException("replaceLastElement failed");
+        }
+    }
 
     /**
      * key: unique id
@@ -37,9 +60,9 @@ public class QueueManager<R> {
         queue.add(new ScoredItem<>(item, score));
     }
 
-    public R poll() {
+    public R peek() {
         for (Map.Entry<String, PriorityQueue<ScoredItem<R>>> entry : queueEntries.entrySet()) {
-            ScoredItem<R> polledItem = entry.getValue().poll();
+            ScoredItem<R> polledItem = entry.getValue().peek();
             if (polledItem != null) {
                 return polledItem.item;
             }
